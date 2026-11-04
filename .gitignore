@@ -28,6 +28,9 @@ compile_commands.json
 build
 /build-*
 
+# Local toolchain (CMake/Ninja wheels, Qt from aqtinstall, logs) - see Scripts/build/env.ps1
+/.tools
+
 # Install dirs
 install
 /install-*
