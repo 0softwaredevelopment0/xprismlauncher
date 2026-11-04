@@ -91,7 +91,7 @@ On Linux, we also offer our own [Flatpak nightly repository](https://github.com/
 
 Feel free to create a GitHub issue if you find a bug or want to suggest a new feature. We have multiple community spaces where other community members can help you:
 
-- **Our Discord server:**
+- **Our Discord server:** (Software Development)
 
 [![Prism Launcher Discord server](https://discordapp.com/api/guilds/1031648380885147709/widget.png?style=banner3)](https://dsc.gg/softwaredev)
 
