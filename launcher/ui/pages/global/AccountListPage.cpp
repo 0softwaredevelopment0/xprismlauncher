@@ -55,7 +55,8 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
     ui->setupUi(this);
     ui->listView->setEmptyString(
         tr("Welcome!\n"
-           "If you're new here, you can select the \"Add Microsoft\" button to link your Microsoft account."));
+           "Use \"Add licensed (Microsoft)\" to sign in with a Microsoft account that owns Minecraft,\n"
+           "or \"Add non-licensed\" to play with only a nickname."));
     ui->listView->setEmptyMode(VersionListView::String);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -140,15 +141,7 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
 
 void AccountListPage::on_actionAddOffline_triggered()
 {
-    if (!m_accounts->anyAccountIsValid()) {
-        QMessageBox::warning(this, tr("Error"),
-                             tr("You must add a Microsoft account that owns Minecraft before you can add an offline account."
-                                "<br><br>"
-                                "If you have lost your account you can contact Microsoft for support."));
-        return;
-    }
-
-    ChooseOfflineNameDialog dialog(tr("Please enter your desired username to add your offline account."), this);
+    ChooseOfflineNameDialog dialog(tr("Please enter the nickname for the new non-licensed account."), this);
     if (dialog.exec() != QDialog::Accepted) {
         return;
     }

@@ -86,12 +86,18 @@
   </action>
   <action name="actionAddMicrosoft">
    <property name="text">
-    <string>&amp;Add Microsoft</string>
+    <string>&amp;Add licensed (Microsoft)</string>
+   </property>
+   <property name="toolTip">
+    <string>Sign in with a Microsoft account that owns Minecraft</string>
    </property>
   </action>
   <action name="actionAddOffline">
    <property name="text">
-    <string>Add &amp;Offline</string>
+    <string>Add &amp;non-licensed</string>
+   </property>
+   <property name="toolTip">
+    <string>Play with only a nickname, no licence required</string>
    </property>
   </action>
   <action name="actionRefresh">

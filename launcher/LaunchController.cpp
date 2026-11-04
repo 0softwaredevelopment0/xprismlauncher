@@ -93,11 +93,14 @@ void LaunchController::decideAccount()
         m_accountToUse = accounts->at(instanceAccountIndex);
     }
 
-    if (!accounts->anyAccountIsValid()) {
-        // Tell the user they need to log in at least one account in order to play.
+    const bool accountIsUsable =
+        m_accountToUse && (m_accountToUse->accountType() == AccountType::Offline || m_accountToUse->ownsMinecraft());
+    if (!accountIsUsable && !accounts->anyAccountIsValid()) {
+        // Tell the user they need to add at least one account in order to play.
         auto reply = CustomMessageBox::selectable(m_parentWidget, tr("No Accounts"),
-                                                  tr("In order to play Minecraft, you must have at least one Microsoft "
-                                                     "account which owns Minecraft logged in. "
+                                                  tr("In order to play Minecraft, you must add at least one account: "
+                                                     "a licensed Microsoft account, or a non-licensed account that only "
+                                                     "needs a nickname. "
                                                      "Would you like to open the account manager to add an account now?"),
                                                   QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)
                          ->exec();
@@ -111,7 +114,7 @@ void LaunchController::decideAccount()
         }
     }
 
-    if (!m_accountToUse && accounts->anyAccountIsValid()) {
+    if (!m_accountToUse && accounts->count() > 0) {
         // If no default account is set, ask the user which one to use.
         ProfileSelectDialog selectDialog(tr("Which account would you like to use?"), ProfileSelectDialog::GlobalDefaultCheckbox,
                                          m_parentWidget);
@@ -152,6 +155,12 @@ LaunchDecision LaunchController::decideLaunchMode()
     }
 
     if (!accountToCheck) {
+        // Non-licensed accounts have no online session to verify or refresh, so they always launch in offline mode.
+        if (m_accountToUse->accountType() == AccountType::Offline) {
+            m_actualLaunchMode = LaunchMode::Offline;
+            return LaunchDecision::Continue;
+        }
+
         m_actualLaunchMode = LaunchMode::Demo;
         return LaunchDecision::Continue;
     }
