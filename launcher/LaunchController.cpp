@@ -155,9 +155,13 @@ LaunchDecision LaunchController::decideLaunchMode()
     }
 
     if (!accountToCheck) {
-        // Non-licensed accounts have no online session to verify or refresh, so they always launch in offline mode.
+        // A non-licensed account has no online session to verify or refresh, but it must still
+        // use the online code path: LaunchMode::Normal is what runs the version/asset update
+        // task, so missing libraries and natives can be downloaded. The session keeps the
+        // account's offline identity (userType "offline", access token "0"), which is exactly
+        // how upstream launches offline accounts next to a licensed one.
         if (m_accountToUse->accountType() == AccountType::Offline) {
-            m_actualLaunchMode = LaunchMode::Offline;
+            m_actualLaunchMode = LaunchMode::Normal;
             return LaunchDecision::Continue;
         }
 
