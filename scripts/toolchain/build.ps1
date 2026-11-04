@@ -18,6 +18,21 @@ param(
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
+# PowerShell 5.1 turns *any* stderr output of a native command into a terminating error while
+# $ErrorActionPreference is 'Stop' (CMake and vcpkg routinely warn on stderr), so native calls
+# run with 'Continue' and their exit codes are checked explicitly.
+function Invoke-NativeLogged {
+    param([string]$LogPath, [scriptblock]$Command)
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & $Command *> $LogPath
+        return $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previous
+    }
+}
+
 . (Join-Path $PSScriptRoot 'env.ps1') | Out-Null
 
 $BuildDir = Join-Path $Root 'build'
@@ -34,21 +49,21 @@ if (-not $SkipConfigure) {
     # is re-detected instead of being served from CMakeCache.txt.
     Write-Host '== configure =='
     $configureLog = Join-Path $LogDir 'cmake-configure.log'
-    & cmake --preset default "-DCMAKE_BUILD_TYPE=$Config" -U 'Java_*' -U 'CMAKE_Java_*' *> $configureLog
-    if ($LASTEXITCODE -ne 0) {
+    $exit = Invoke-NativeLogged $configureLog { cmake --preset default "-DCMAKE_BUILD_TYPE=$Config" -U 'Java_*' -U 'CMAKE_Java_*' }
+    if ($exit -ne 0) {
         Get-Content $configureLog -Tail 40
-        throw "CMake configure failed (exit $LASTEXITCODE), full log: $configureLog"
+        throw "CMake configure failed (exit $exit), full log: $configureLog"
     }
 }
 
 Write-Host "== build ($Config) =="
 $buildLog = Join-Path $LogDir 'cmake-build.log'
 $sw = [Diagnostics.Stopwatch]::StartNew()
-& cmake --build --preset default --config $Config *> $buildLog
+$exit = Invoke-NativeLogged $buildLog { cmake --build --preset default --config $Config }
 $sw.Stop()
-if ($LASTEXITCODE -ne 0) {
+if ($exit -ne 0) {
     Get-Content $buildLog -Tail 40
-    throw "Build failed (exit $LASTEXITCODE), full log: $buildLog"
+    throw "Build failed (exit $exit), full log: $buildLog"
 }
 
 $exe = Join-Path $BuildDir "$Config\prismlauncher.exe"
@@ -60,10 +75,10 @@ if ($Install) {
     # Qt's bin directory happens to be on PATH (otherwise STATUS_DLL_NOT_FOUND).
     Write-Host '== install =='
     $installLog = Join-Path $LogDir 'cmake-install.log'
-    & cmake --install $BuildDir --config $Config *> $installLog
-    if ($LASTEXITCODE -ne 0) {
+    $exit = Invoke-NativeLogged $installLog { cmake --install $BuildDir --config $Config }
+    if ($exit -ne 0) {
         Get-Content $installLog -Tail 40
-        throw "Install failed (exit $LASTEXITCODE), full log: $installLog"
+        throw "Install failed (exit $exit), full log: $installLog"
     }
     Write-Host "Installed -> $(Join-Path $Root 'install')"
 
