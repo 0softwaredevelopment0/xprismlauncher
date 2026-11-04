@@ -7,14 +7,64 @@
 </p>
 
 <p align="center">
-  Prism Launcher is a custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.<br />
-  <br />This is a <b>fork</b> of the MultiMC Launcher and is <b>not</b> endorsed by it.
+  <b>XPrismLauncher</b> is a fork of Prism Launcher with its own features and a self-contained Windows build setup.<br />
+  <br />It is <b>not</b> Prism Launcher and is <b>not</b> endorsed by or affiliated with the Prism Launcher project<br />
+  (which in turn is a <b>fork</b> of the MultiMC Launcher, also unendorsed by it).
 </p>
+
+## This fork: XPrismLauncher
+
+| | |
+|---|---|
+| Fork | [0softwaredevelopment0/xprismlauncher](https://github.com/0softwaredevelopment0/xprismlauncher) |
+| Upstream | [PrismLauncher/PrismLauncher](https://github.com/PrismLauncher/PrismLauncher) |
+| Working branch | `x/develop` — fork changes live here; `develop` mirrors upstream |
+| Based on | Prism Launcher 12.0.0 |
+
+No prebuilt binaries are published for this fork — build it locally with the steps below.
+
+### What is different from upstream
+
+- **Two account types instead of licensed accounts only**
+  - **Licensed (Microsoft)** — the usual Microsoft sign-in; a Microsoft account that owns Minecraft is required.
+  - **Non-licensed** — requires nothing but a nickname: no Microsoft account and no game licence. Created via
+    `Accounts → Add non-licensed`, with the vanilla username rule (`3–16` characters, `A-Za-z0-9_`) or any nickname
+    when *Allow invalid usernames* is ticked. Such accounts always launch in offline mode, so they can play
+    singleplayer and offline-mode servers, but not online-mode ones.
+  - The launcher no longer enforces licensed-only gates: an account can be added without a licensed one, the
+    first-run setup wizard stops asking for a Microsoft login once any account exists, and an instance launches
+    instead of falling back to demo mode. The accounts table names the two kinds `Licensed` and `Non-licensed`.
+- **One-click Windows start** — `Start XPrismLauncher.cmd` runs the built launcher with a portable data directory
+  (`.tools\run-data`) and a writable `TEMP`, so it also works where writes to `%TEMP%` are restricted.
+- **Project-local build toolchain** — CMake, Ninja, Qt 6, vcpkg caches and temporary files all live under `.tools\`;
+  nothing is installed system-wide. Scripts and pitfalls: `scripts\toolchain\README.md`.
+
+### Building on Windows
+
+Requirements: Visual Studio 2022 (MSVC x64), JDK 8–19 (JDK 20+ rejects the `-source 7` Java libraries), and
+Python with [uv](https://docs.astral.sh/uv/). CMake, Ninja, Qt and vcpkg are provisioned into `.tools\` on first use.
+
+```powershell
+. .\scripts\toolchain\env.ps1             # MSVC + Qt + CMake/Ninja + vcpkg into the current session
+.\scripts\toolchain\build.ps1 -Install   # configure + build Release + install\
+.\scripts\toolchain\run.ps1              # run install\prismlauncher.exe with a portable data directory
+```
+
+`cmake --install` is part of `-Install` on purpose: it deploys the Qt DLLs and plugins next to the binary and
+writes a relocatable `qt.conf`, which is what makes `install\prismlauncher.exe` self-contained. After a successful
+build, double-click `Start XPrismLauncher.cmd`.
+
+### Branches and upstream sync
+
+- `develop` — plain mirror of `upstream/develop`, never edited.
+- `x/develop` — fork changes, released from here.
+- Sync: `git fetch upstream && git merge upstream/develop` (conflicts resolved in `x/develop`).
 
 ## Installation
 
-- All downloads and instructions for Prism Launcher can be found on our [Website](https://prismlauncher.org/download).
-- Last build status can be found in the [GitHub Actions](https://github.com/PrismLauncher/PrismLauncher/actions) tab (this also includes the pull requests status).
+If you are looking for Prism Launcher itself, all official downloads and instructions are on their
+[website](https://prismlauncher.org/download); last upstream build status is in the
+[GitHub Actions](https://github.com/PrismLauncher/PrismLauncher/actions) tab (it also includes pull request status).
 
 <p align="center">
 <a href="https://repology.org/project/prismlauncher/versions">
@@ -60,6 +110,7 @@ The translation effort for Prism Launcher is hosted on [Weblate](https://hosted.
 ## Building
 
 If you want to build Prism Launcher yourself, check the [build instructions](https://prismlauncher.org/wiki/development/build-instructions).
+For this fork, the Windows build is scripted — see [Building on Windows](#building-on-windows) above.
 
 ## Sponsors & Partners
 
