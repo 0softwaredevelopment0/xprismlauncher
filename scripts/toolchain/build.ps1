@@ -66,4 +66,11 @@ if ($Install) {
         throw "Install failed (exit $LASTEXITCODE), full log: $installLog"
     }
     Write-Host "Installed -> $(Join-Path $Root 'install')"
+
+    # The install step leaves a 1-byte qt.conf (a single space), so Qt falls back to the
+    # Qt prefix compiled into the binaries (.tools\Qt\...). That only works while .tools
+    # exists - a real Prefix=. makes install\ relocatable.
+    $qtConf = Join-Path $Root 'install\qt.conf'
+    [System.IO.File]::WriteAllText($qtConf, "[Paths]`nPrefix = .`n", (New-Object System.Text.UTF8Encoding($false)))
+    Write-Host "qt.conf    -> $qtConf"
 }
